@@ -38,7 +38,7 @@
 <strong>Checks</strong>
 
 [![Snyk](https://img.shields.io/badge/security-snyk-4203B2?style=for-the-badge&logo=snyk&logoColor=white)](https://snyk.io/test/github/babysea-community/ledger-fortress?targetFile=package.json)
-[![Codecov](https://img.shields.io/codecov/c/github/babysea-community/ledger-fortress?style=for-the-badge&logo=codecov&logoColor=white&color=FF0077&token=DBPEHD2765)](https://codecov.io/github/babysea-community/ledger-fortress)
+[![Codecov](https://img.shields.io/codecov/c/github/babysea-community/ledger-fortress?style=for-the-badge&logo=codecov&logoColor=white&color=FF0077&token=NXej1IrSV4)](https://codecov.io/github/babysea-community/ledger-fortress)
 [![Sentry Check](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/sentry-check.yml?style=for-the-badge&label=sentry+check&logo=sentry&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/sentry-check.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/codeql.yml?style=for-the-badge&label=codeql&logo=github&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/codeql.yml)
 [![Package Check](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/publish-check.yml?style=for-the-badge&label=package+check&logo=npm&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/publish-check.yml)
