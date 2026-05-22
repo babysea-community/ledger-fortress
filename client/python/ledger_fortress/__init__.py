@@ -5,6 +5,6 @@
 
 from ledger_fortress.fortress import LedgerFortress
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 
 __all__ = ["LedgerFortress", "__version__"]
