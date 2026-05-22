@@ -56,7 +56,7 @@
     "test:db:pgtap": "bash -c 'set -euo pipefail; output=$(mktemp); psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f ../../test/invariants.pgtap.sql | tee \"$output\"; ! grep -q \"^not ok\" \"$output\"'"
   },
   "dependencies": {
-    "pg": "^8.13.0"
+    "pg": "^8.21.0"
   },
   "peerDependencies": {
     "stripe": ">=14.0.0"
