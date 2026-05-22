@@ -1,0 +1,81 @@
+{
+  "name": "ledger-fortress",
+  "version": "0.1.6",
+  "description": "Atomic credit settlement engine for async inference workloads. Built with Stripe and Supabase.",
+  "license": "Apache-2.0",
+  "author": "BabySea, Inc. <dev@babysea.ai>",
+  "homepage": "https://github.com/babysea-community/ledger-fortress",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/babysea-community/ledger-fortress.git",
+    "directory": "client/typescript"
+  },
+  "keywords": [
+    "babysea",
+    "open-source",
+    "primitive",
+    "stripe",
+    "supabase",
+    "ai-infrastructure",
+    "control-plane",
+    "execution-layer",
+    "developer-tools",
+    "generative-ai",
+    "inference-providers",
+    "async-jobs",
+    "billing",
+    "credits"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./stripe": {
+      "types": "./dist/stripe.d.ts",
+      "import": "./dist/stripe.mjs",
+      "require": "./dist/stripe.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/stripe.ts --format cjs,esm --dts --clean",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage --coverage.reporter=text --coverage.reporter=lcov",
+    "lint": "tsc --noEmit",
+    "test:db:concurrency": "tsx ../../examples/concurrency-simulation/reserve-race.ts",
+    "test:db:pgtap": "bash -c 'set -euo pipefail; output=$(mktemp); psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f ../../test/invariants.pgtap.sql | tee \"$output\"; ! grep -q \"^not ok\" \"$output\"'"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "peerDependencies": {
+    "stripe": ">=14.0.0"
+  },
+  "peerDependenciesMeta": {
+    "stripe": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0",
+    "@vitest/coverage-v8": "^4.1.5",
+    "stripe": "^22.1.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

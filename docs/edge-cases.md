@@ -1,0 +1,102 @@
+# The Seven Edge Cases
+
+Every async credit system must survive these scenarios. `ledger-fortress` handles all of them at the SQL level.
+
+## 1. TOCTOU Race (Two clicks, 50ms apart)
+
+**Scenario:** User clicks "Generate" twice in rapid succession. Both requests check the balance, both see $10, both deduct $5. Final balance: $0 instead of $5. Overdraw.
+
+**The naive approach:**
+```sql
+-- Request A                       -- Request B
+SELECT credits FROM credits;        SELECT credits FROM credits;
+-- credits = 10                     -- credits = 10 (not yet updated)
+UPDATE credits SET credits = 5;     UPDATE credits SET credits = 5;
+-- Both succeed. Balance should be 0 but user only paid for one.
+```
+
+**The fortress approach:**
+```sql
+-- Single atomic statement. No separate SELECT.
+UPDATE credits
+SET credits = credits - 5
+WHERE account_id = $1
+  AND credits >= 5                  -- atomic guard
+RETURNING credits;
+```
+
+Request A runs the UPDATE, balance goes from 10 to 5. Request B runs the same UPDATE but now `credits >= 5` is still true (5 >= 5), so it also succeeds. Balance: 0. If Request B asked for 6, `credits >= 6` would be false (5 < 6), zero rows updated, reservation fails. No overdraw.
+
+## 2. Provider Ghost (No webhook ever arrives)
+
+**Scenario:** You reserve credits and dispatch to a provider. The provider crashes, goes offline, or silently drops your request. No success webhook. No failure webhook. Credits locked forever.
+
+**Defense:** Crash recovery cron runs every 5 minutes:
+```sql
+SELECT * FROM find_orphaned_reservations(5, 100);
+```
+Finds reservations older than 5 minutes with no matching charge or refund terminal event. Refunds them automatically.
+
+## 3. Duplicate Success Webhook
+
+**Scenario:** Stripe retries a webhook. Your provider sends two identical success callbacks. Handler runs `charge_credits` twice.
+
+**Defense:** Unique partial index:
+```sql
+CREATE UNIQUE INDEX idx_credit_ledger_charge_idempotent
+  ON credit_ledger (generation_id) WHERE type = 'charge';
+```
+
+Second INSERT hits `unique_violation`. The function catches it and returns FALSE (no-op).
+
+## 4. Duplicate Failure Webhook
+
+**Scenario:** Same as #3, but for failure. Two refund attempts for the same generation.
+
+**Defense:** Unique partial index:
+```sql
+CREATE UNIQUE INDEX idx_credit_ledger_refund_idempotent
+  ON credit_ledger (generation_id) WHERE type = 'refund';
+```
+
+Second refund is a no-op. Credits returned exactly once.
+
+## 5. Charge Arrives After Refund (Out-of-order webhooks)
+
+**Scenario:** Provider sends two webhooks: first a "failed" (causing refund), then corrects to "succeeded" (causing charge). Or: crash recovery refunds, then the real success webhook arrives late.
+
+With the charge being log-only (no balance change), the user's credits were already returned by the refund. The charge would silently confirm a generation that got free credits.
+
+**Defense:** `charge_credits` checks for an existing refund under the account lock. If found, it re-deducts the reserved amount before logging success. If the balance cannot cover the late correction, it returns `FALSE` and does not log the charge; the application can retry, pause the account, or route the case to manual review.
+
+## 6. Refund Arrives After Charge (The deadly sequence)
+
+**Scenario:** 
+1. `reserve_credits` ➜ balance deducted
+2. Success webhook ➜ `charge_credits` (log-only confirmation)
+3. Your handler crashes and restarts
+4. Crash recovery finds the reservation, calls `refund_credits`
+5. Credits returned ➜ user got a free generation
+
+This is the most dangerous edge case. The user's generation succeeded (they have the output), but their credits were refunded.
+
+**Defense:** `refund_credits` has terminal-state guards:
+```sql
+IF EXISTS (
+  SELECT 1 FROM credit_ledger
+  WHERE generation_id = p_generation_id
+    AND type = 'charge'
+) THEN
+  RETURN FALSE;
+END IF;
+```
+
+The refund is blocked after charge. Credits stay deducted. User pays for what they received.
+
+## 7. Terminal Event Without Reservation (App bug)
+
+**Scenario:** A buggy handler calls `charge_credits` or `refund_credits` for a `generation_id` that was never reserved.
+
+Without a reserve guard, a refund could mint credits and a charge could mark unpaid output as paid.
+
+**Defense:** Every terminal path checks for a matching `reserve` row for the same `account_id` and `generation_id`. If no reservation exists, the function returns `FALSE` and leaves the balance unchanged.

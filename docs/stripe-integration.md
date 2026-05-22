@@ -1,0 +1,190 @@
+# Stripe Integration Guide
+
+`ledger-fortress` integrates with Stripe to convert subscription payments and credit pack purchases into spendable credits stored in Supabase.
+
+## Overview
+
+```
+Stripe                      ledger-fortress             Your App
+  │                              │                        │
+  │  invoice.paid                │                        │
+  │ ───────────────────────────► │                        │
+  │                              │  Supabase RPC          │
+  │                              │  add_credits()         │
+  │                              │  (idempotent via       │
+  │                              │   invoice ID)          │
+  │                              │                        │
+  │  checkout.session.completed  │                        │
+  │ ───────────────────────────► │                        │
+  │                              │  Supabase RPC          │
+  │                              │  add_credits()         │
+  │                              │  (idempotent via       │
+  │                              │   payment intent ID)   │
+  │                              │                        │
+  │                              │                        │  reserve()
+  │                              │ ◄──────────────────────│
+  │                              │                        │  ... generate ...
+  │                              │                        │  charge() or refund()
+  │                              │ ◄──────────────────────│
+```
+
+## Setup
+
+### Stripe event and key scope
+
+Configure a Stripe webhook endpoint for only the credit-grant events this package handles:
+
+- `invoice.paid`
+- `checkout.session.completed`
+- `checkout.session.async_payment_succeeded` when you support asynchronous payment methods
+
+Use `STRIPE_WEBHOOK_SECRET` for signature verification. The webhook helper does not need a broad Stripe API key to mutate credits; your application only needs a Stripe secret key if it also calls Stripe APIs such as creating checkout sessions or retrieving expanded objects. Keep that key restricted to those application-owned operations.
+
+### 1. Configure your plans
+
+Map your Stripe Price IDs to credit allocations when your app needs plan-based grants or plan-aware UI. The default credit grant path does not require this lookup; it mirrors BabySea's current production webhook behavior by using the paid Stripe amount.
+
+```sql
+INSERT INTO plans (name, variant_id, credits) VALUES
+  ('Starter Monthly',    'price_1Abc...', 9.000),
+  ('Starter Yearly',     'price_1Def...', 90.000),
+  ('Pro Monthly',        'price_1Ghi...', 29.000),
+  ('Pro Yearly',         'price_1Jkl...', 290.000),
+  ('Credit Pack $10',    'price_1Mno...', 10.000),
+  ('Credit Pack $50',    'price_1Pqr...', 50.000),
+  ('Credit Pack $100',   'price_1Stu...', 100.000);
+```
+
+### 2. Set up the webhook handler
+
+#### TypeScript (Next.js example)
+
+```typescript
+// app/api/stripe/webhook/route.ts
+import Stripe from 'stripe';
+import { LedgerFortress } from 'ledger-fortress';
+import { createStripeWebhookHandler, verifyStripeSignature } from 'ledger-fortress/stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const fortress = new LedgerFortress({ databaseUrl: process.env.SUPABASE_DATABASE_URL! });
+
+const handler = createStripeWebhookHandler({
+  fortress,
+  resolveAccountId: async (customerId) => {
+    // Your logic to map Stripe customer ➜ account
+    const account = await db.accounts.findFirst({
+      where: { stripeCustomerId: customerId },
+    });
+    return account?.id ?? null;
+  },
+  // Optional: guard credit pack purchases
+  hasActiveSubscription: async (accountId) => {
+    const sub = await db.subscriptions.findFirst({
+      where: { accountId, status: 'active' },
+    });
+    return !!sub;
+  },
+});
+
+export async function POST(request: Request) {
+  const body = await request.text();
+  const signature = request.headers.get('stripe-signature')!;
+
+  const event = verifyStripeSignature(
+    stripe,
+    body,
+    signature,
+    process.env.STRIPE_WEBHOOK_SECRET!,
+  );
+
+  const result = await handler(event);
+  return Response.json(result);
+}
+```
+
+### 3. Handle the events
+
+The webhook handler processes BabySea-derived credit-grant events. In production, pass only events that were verified with Stripe's raw-body signature verification.
+
+#### `invoice.paid`
+
+Triggered when a subscription is created, renewed, or updated. The handler:
+
+1. Extracts `amount_paid` from the invoice (cents)
+2. Converts to credits (`amount/100`, since 1 credit = $1) by default, or calls `resolveInvoiceCredits` if your app has explicitly configured a plan-based resolver.
+3. Calls `add_credits()` with idempotency key `invoice:{invoiceId}`
+4. Re-arms any fired credit alert thresholds where the balance has recovered to at least the threshold
+
+Only subscription-related invoices are processed (`subscription_create`, `subscription_cycle`, `subscription_update`). Manual invoices are ignored.
+
+#### `checkout.session.completed`
+
+Triggered when a customer completes a one-time purchase (credit pack). The handler:
+
+1. Checks that the session mode is `payment` (not `subscription`)
+2. Requires `payment_status === 'paid'` when Stripe includes that field
+3. Optionally verifies the account has an active subscription (prevents stale checkout)
+4. Converts `amount_total` to credits by default, or calls `resolveCheckoutCredits` if your app has explicitly configured a plan-based resolver.
+5. Calls `add_credits()` with idempotency key `order:{paymentIntentId}`
+
+For asynchronous payment methods, also subscribe to `checkout.session.async_payment_succeeded`; it runs through the same paid checkout handler.
+
+Stripe `charge.refunded` and `charge.dispute.created` credit deductions are intentionally not implemented here because BabySea's current production credit ledger does not include automatic refund/dispute credit deductions. Handle customer refunds, dispute evidence, and compliance workflows in your billing system outside this package.
+
+### 4. Idempotency guarantees
+
+Every `add_credits` call uses a unique idempotency key derived from the Stripe object ID:
+
+| Event | Idempotency key |
+|---|---|
+| `invoice.paid` | `invoice:inv_xxx` |
+| `checkout.session.completed` | `order:pi_xxx` or `order:cs_xxx` |
+
+BabySea production derives the checkout grant key from its internal order ID. The OSS helper uses Stripe's payment intent when present, otherwise the checkout session ID, because those IDs are available in a standalone Stripe integration.
+
+The `idx_credit_ledger_add_idempotent` unique partial index ensures that even if Stripe retries the webhook 10 times, credits are granted exactly once.
+
+## Credit pack purchase guard
+
+If you offer credit packs as one-time purchases, implement the `hasActiveSubscription` callback to prevent stale checkout redemption:
+
+**Scenario:** User starts a credit pack checkout ➜ cancels their subscription ➜ completes the checkout. Without the guard, they'd get credits without an active subscription.
+
+**With the guard:** `ledger-fortress` checks for an active subscription before granting credits. If none exists, the handler returns `skipped_no_subscription`; log that result in your application if you need an audit trail.
+
+## Rollover semantics
+
+Credits are **additive**. When a subscription renews:
+
+```
+Before renewal: balance = $3.50 (leftover from last month)
+invoice.paid:   add_credits($29.00)
+After renewal:  balance = $32.50
+```
+
+Credits never reset. This is critical for credit pack purchases - a user who buys a $10 pack should never lose those credits on subscription renewal.
+
+## Amount-based vs plan-based grants
+
+The default handler grants credits from the amount Stripe says was actually paid. This is the BabySea-derived path: subscription invoices use `amount_paid/100`, credit-pack checkouts use `amount_total/100`, and non-positive amounts do not create credits.
+
+If your product grants a fixed number of credits per Stripe Price ID, use `resolveInvoiceCredits` or `resolveCheckoutCredits` and look up `plans.credits` through the hardened `get_plan_credits()` boundary with `fortress.getPlanCredits(priceId)`. Return `null` to skip allocation when the event does not contain the price metadata you require.
+
+Those resolvers are evaluated before the default amount-based fallback so adopters can deliberately choose plan-based grants. They do not add new Stripe event types, refund/dispute deductions, debt tracking, or a generic payment abstraction.
+
+```typescript
+const handler = createStripeWebhookHandler({
+  fortress,
+  resolveAccountId,
+  resolveInvoiceCredits: async (invoice) => {
+    const line = (invoice.lines as { data?: Array<{ price?: { id?: string } }> } | undefined)?.data?.[0];
+    const priceId = line?.price?.id;
+    return priceId ? fortress.getPlanCredits(priceId) : null;
+  },
+  resolveCheckoutCredits: async (session) => {
+    const line = (session.line_items as { data?: Array<{ price?: { id?: string } }> } | undefined)?.data?.[0];
+    const priceId = line?.price?.id;
+    return priceId ? fortress.getPlanCredits(priceId) : null;
+  },
+});
+```
