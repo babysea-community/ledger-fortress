@@ -4,6 +4,41 @@ All notable changes will be documented here. The format follows [Keep a Changelo
 
 ## Unreleased
 
+## [0.2.0] - 2026-05-22
+
+### Changed
+
+- Adjusted advisory Snyk Code and IaC scans to avoid GitHub failure annotations while preserving SARIF upload, IaC reporting, and the enforced Open Source test.
+- Constrained GitHub Actions Codecov uploads to the explicit TypeScript LCOV report to avoid irrelevant uploader search warnings.
+
+## [0.1.9] - 2026-05-22
+
+### Added
+
+- Added a CircleCI package-check workflow for ledger-fortress TypeScript lint/coverage/build/package validation, Python package validation, and trusted `main` Codecov CLI upload when `CODECOV_TOKEN` is configured in CircleCI.
+- Added a Snyk Security workflow for Snyk Code SARIF upload, Open Source scanning and monitoring, and IaC reporting with `SNYK_TOKEN`.
+- Added a Shields.io CircleCI README badge that matches the project badge style.
+
+### Changed
+
+- Replaced the static Snyk README badge with a realtime Snyk Security workflow status badge.
+
+## [0.1.8] - 2026-05-22
+
+### Added
+
+- Added repository `codecov.yml` with GitHub Actions and CircleCI provider recognition, CI-gated Codecov status, pull request comment configuration, and TypeScript client path fixes.
+
+### Changed
+
+- Updated trusted Package Check Codecov uploads to pass `CODECOV_TOKEN` through the action environment and fail CI when coverage upload fails.
+
+## [0.1.7] - 2026-05-22
+
+### Changed
+
+- Updated primitive deploy automation to sync GitHub repository description, homepage, and topics from TypeScript package metadata.
+
 ## [0.1.6] - 2026-05-22
 
 ### Changed
