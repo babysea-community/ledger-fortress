@@ -1,7 +1,7 @@
 <div align="center">
 
 <p>
-  <img src="public/icon.png" width="100" alt="Ledger Fortress icon" />
+  <img src="public/icon.png" width="140" alt="Ledger Fortress icon" />
 </p>
 
 <h1>
@@ -18,16 +18,13 @@
 
 <br />
 
+<strong>Quick links</strong>
+
 [![BabySea Blog](https://custom-icon-badges.demolab.com/badge/babysea-deep_dive-0D9488?style=for-the-badge&logo=babysea&logoColor=white)](https://babysea.ai/blog/how-babysea-built-atomic-credit-settlement-on-stripe-and-postgres)
 
 <br />
 
-<img src="public/card.png" alt="Ledger Fortress card" />
-
-<br/>
-<br/>
-
-<strong>Project</strong>
+<strong>Project details</strong>
 
 [![BabySea OSS Primitive](https://custom-icon-badges.demolab.com/badge/oss-primitive-EA580c?style=for-the-badge&logo=babysea&logoColor=white)](#babysea-oss-taxonomy)
 [![BabySea OSS Status Production](https://custom-icon-badges.demolab.com/badge/oss_status-production-C026D3?style=for-the-badge&logo=babysea&logoColor=white)](#status)
@@ -35,15 +32,16 @@
 
 <br/>
 
-<strong>Assistants & Bots</strong>
+<strong>Assistants & bots</strong>
 
-![Dependabot](https://img.shields.io/badge/dependabot-025E8C?style=for-the-badge&logo=dependabot&logoColor=white)
 ![OpenAI](https://custom-icon-badges.demolab.com/badge/openai-000000?style=for-the-badge&logo=openai&logoColor=white)
+![Dependabot](https://img.shields.io/badge/dependabot-025E8C?style=for-the-badge&logo=dependabot&logoColor=white)
 
 <br/>
 
 <strong>Checks</strong>
 
+[![GitLabCI](https://img.shields.io/gitlab/pipeline-status/babysea/ledger-fortress?branch=main&style=for-the-badge&label=gitlabci&logo=gitlab&logoColor=white&color=FC6D26)](https://gitlab.com/babysea/ledger-fortress/-/commits/main)
 [![CircleCI](https://img.shields.io/badge/circleci-passed-003740?style=for-the-badge&logo=circleci&logoColor=white)](https://dl.circleci.com/status-badge/redirect/circleci/2uTLcwc4naeNuKDP41es88/RFYv135uZjhZPzaiokUiuN/tree/main)
 [![Codecov](https://img.shields.io/codecov/c/github/babysea-community/ledger-fortress?style=for-the-badge&label=codecov&logo=codecov&logoColor=white&color=FF0077&token=NXej1IrSV4)](https://codecov.io/github/babysea-community/ledger-fortress)
 [![Snyk](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/snyk-security.yml?branch=main&style=for-the-badge&label=snyk&logo=snyk&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/snyk-security.yml)
@@ -58,9 +56,13 @@
 [![Stripe](https://img.shields.io/badge/stripe-533AFD?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com)
 [![Supabase](https://img.shields.io/badge/supabase-249361?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 
+<br/>
+
+<img src="public/card.png" alt="Ledger Fortress card" />
+
 </div>
 
----
+<br/>
 
 ## BabySea OSS taxonomy
 
