@@ -4,6 +4,12 @@ All notable changes will be documented here. The format follows [Keep a Changelo
 
 ## Unreleased
 
+## [0.2.5] - 2026-05-25
+
+### Changed
+
+- Added a `## Scope` section to `AGENTS.md` describing the supported stack, BabySea production lineage, exclusions, and naming, matching the other primitives.
+
 ## [0.2.4] - 2026-05-25
 
 ### Added

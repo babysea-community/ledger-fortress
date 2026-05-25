@@ -5,6 +5,13 @@ See [README.md](README.md) for the full story.
 
 This file mirrors the README so deploys, IDEs, and tooling that read `AGENTS.md` see the same context.
 
+## Scope
+
+- **Supported OSS stack:** Supabase (Postgres + RLS + SQL migrations) + Stripe (Checkout, billing webhooks, refunds) + TypeScript/Python SDKs.
+- **Inspired by BabySea production:** atomic reserve ➜ charge ➜ refund flow over an append-only `credit_ledger` with idempotent mutations and Stripe-signed webhook drivers.
+- **Not included:** hosted API routes, request authentication, generation orchestration, queueing, provider clients, frontend dashboards, or non-Stripe payment processors.
+- **Naming:** BabySea production says Supabase. PostgreSQL/Postgres appear only for SQL engine behavior, connection strings, migration tooling, or local stand-ins.
+
 ## Layout
 
 | Path | Purpose |
