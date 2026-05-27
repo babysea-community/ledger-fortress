@@ -1,7 +1,7 @@
 <div align="center">
 
 <p>
-  <img src="public/icon.png" width="140" alt="Ledger Fortress icon" />
+  <img src="public/icon.png" width="120" alt="Ledger Fortress icon" />
 </p>
 
 <h1>
@@ -45,7 +45,6 @@
 [![GitLabCI](https://img.shields.io/gitlab/pipeline-status/babysea/ledger-fortress?branch=main&style=for-the-badge&label=gitlabci&logo=gitlab&logoColor=white&color=FC6D26)](https://gitlab.com/babysea/ledger-fortress/-/commits/main)
 [![CircleCI](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcircleci.com%2Fapi%2Fv1.1%2Fproject%2Fcircleci%2F2uTLcwc4naeNuKDP41es88%2FRFYv135uZjhZPzaiokUiuN%2Ftree%2Fmain%3Flimit%3D1&query=%24%5B0%5D.status&style=for-the-badge&logo=circleci&logoColor=white&label=circleci&color=003740)](https://dl.circleci.com/status-badge/redirect/circleci/2uTLcwc4naeNuKDP41es88/RFYv135uZjhZPzaiokUiuN/tree/main)
 [![Codecov](https://img.shields.io/codecov/c/github/babysea-community/ledger-fortress?style=for-the-badge&label=codecov&logo=codecov&logoColor=white&color=FF0077&token=NXej1IrSV4)](https://codecov.io/github/babysea-community/ledger-fortress)
-[![Snyk](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/snyk-security.yml?branch=main&style=for-the-badge&label=snyk&logo=snyk&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/snyk-security.yml)
 [![Sentry](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/sentry-check.yml?style=for-the-badge&label=sentry&logo=sentry&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/sentry-check.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/codeql.yml?style=for-the-badge&label=codeql&logo=github&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/codeql.yml)
 [![Package](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/publish-check.yml?style=for-the-badge&label=package&logo=npm&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/publish-check.yml)
