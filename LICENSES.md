@@ -1,6 +1,6 @@
 # License Compliance
 
-Ledger Fortress is Apache-2.0. Dependency license review is part of the public supply-chain posture for the standalone primitive repository.
+Ledger Fortress is Apache-2.0. Dependency license review is part of the public supply-chain posture for the standalone repository.
 
 ## Allowed Licenses
 
