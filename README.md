@@ -1,26 +1,18 @@
 <div align="center">
 
-<p>
-  <img src="public/icon.png" width="120" alt="Ledger Fortress icon" />
-</p>
+<img src="public/icon.png" width="120" alt="Ledger Fortress icon" />
 
-<h1>
-  Ledger Fortress
-</h1>
+# Ledger Fortress
 
-<p>
-  Atomic credit settlement engine for async inference workloads. Built with Stripe and Supabase.
-</p>
+Atomic credit settlement engine for async inference workloads.
 
-<p>
-  <strong>Every credit movement is accounted for</strong>
-</p>
+### Every credit movement is accounted for
 
 <br />
 
 <strong>Project details</strong>
 
-[![BabySea Blog](https://custom-icon-badges.demolab.com/badge/babysea-blog-0D9488?style=for-the-badge&logo=babysea&logoColor=white)](https://babysea.ai/blog/how-babysea-built-atomic-credit-settlement-on-stripe-and-postgres)
+[![BabySea Blog](https://custom-icon-badges.demolab.com/badge/read-blog-0D9488?style=for-the-badge&logo=babysea&logoColor=white)](https://babysea.ai/blog/how-babysea-built-atomic-credit-settlement-on-stripe-and-postgres)
 [![BabySea OSS Primitive](https://custom-icon-badges.demolab.com/badge/oss-primitive-EA580c?style=for-the-badge&logo=babysea&logoColor=white)](#babysea-oss-taxonomy)
 [![BabySea OSS Status Production](https://custom-icon-badges.demolab.com/badge/oss_status-production-C026D3?style=for-the-badge&logo=babysea&logoColor=white)](#status)
 [![License](https://custom-icon-badges.demolab.com/badge/license-apache_2.0-059669?style=for-the-badge&logo=apache&logoColor=white)](LICENSE)
