@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="public/icon.png" width="120" alt="Ledger Fortress icon" />
+<img src="public/icon.png" width="100" alt="Ledger Fortress icon" />
 
 # Ledger Fortress
 
 Atomic credit settlement engine for async inference workloads.
 
-### Every credit movement is accounted for
+### Every credit movement is accounted for.
 
 <br />
 
@@ -26,7 +26,7 @@ Atomic credit settlement engine for async inference workloads.
 [![Codecov](https://img.shields.io/codecov/c/github/babysea-community/ledger-fortress?style=for-the-badge&label=codecov&logo=codecov&logoColor=white&color=FF0077&token=NXej1IrSV4)](https://codecov.io/github/babysea-community/ledger-fortress)
 [![Sentry](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/sentry-check.yml?style=for-the-badge&label=sentry&logo=sentry&logoColor=white&color=181225)](https://github.com/babysea-community/ledger-fortress/actions/workflows/sentry-check.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/codeql.yml?style=for-the-badge&label=codeql&logo=github&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/codeql.yml)
-[![Package](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/publish-check.yml?style=for-the-badge&label=package&logo=npm&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/publish-check.yml)
+[![Package](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/package-check.yml?style=for-the-badge&label=package&logo=npm&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/package-check.yml)
 
 <br/>
 
@@ -441,7 +441,7 @@ For a proof-oriented map from invariants to SQL mechanisms, see [`docs/INVARIANT
 | Gate | Command or workflow | What it proves |
 | :--- | :------------------ | :------------- |
 | TypeScript package | `cd client/typescript && npm ci && npm run lint && npm run test:coverage && npm run build` | SDK types, unit tests, lcov coverage, and package build are clean. |
-| Package workflow | `.github/workflows/publish-check.yml` | TypeScript lint/coverage/build, Codecov upload when credentials are available, verification-script syntax, npm pack dry-run, Python install, compile, and metadata parse. |
+| Package workflow | `.github/workflows/package-check.yml` | TypeScript lint/coverage/build, Codecov upload when credentials are available, verification-script syntax, npm pack dry-run, Python install, compile, and metadata parse. |
 | Python local quality | `cd client/python && pip install -e ".[dev]" && ruff check . && pyright` | Python package remains typed and lint-clean for contributors. |
 | SQL invariants | `psql "$DATABASE_URL" -f test/invariants.pgtap.sql` | Reserve, charge, refund, and idempotency behavior stay intact on a disposable database. |
 | Parallel race | `cd client/typescript && LEDGER_FORTRESS_CONFIRM_DISPOSABLE_DB=1 npm run test:db:concurrency` | Concurrent reserves cannot overdraw and orphan refunds restore balance. |
@@ -553,4 +553,4 @@ We welcome PRs, issues, and design discussion. See [`CONTRIBUTING.md`](CONTRIBUT
 
 ## 12. License
 
-[Apache License 2.0](LICENSE). Use it, fork it, ship it. Just keep the notice.
+[Apache License 2.0](LICENSE). Use it, fork it, ship it.

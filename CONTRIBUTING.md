@@ -1,97 +1,108 @@
 # Contributing
 
-Thanks for improving Ledger Fortress.
+Thanks for improving this project.
 
-Ledger Fortress is an atomic credit-settlement primitive for Stripe + Supabase systems. Good contributions protect idempotency, preserve no-overdraft behavior, and keep payment, database, and service-role boundaries explicit.
+This repository is part of the BabySea OSS family. It may be an SDK, primitive, starter, documentation site, or another standalone project. Good contributions keep the public contract clear, the first-run path reliable, security boundaries explicit, and secrets out of public surfaces.
 
-## Contribution guidelines
+## Project direction
 
-- Keep all contributions under Apache 2.0. By submitting a PR you agree to license it under Apache 2.0.
-- Preserve v1 schemas. If a change requires breaking `schemas/credit-event.v1.json` or `schemas/credit-alert.v1.json`, publish a v2 alongside it.
-- Treat idempotency as a hard contract. Any SQL function that mutates `credits` or `credit_ledger` must be provably idempotent and tested by calling it twice.
-- Cover edge cases when touching `reserve_credits`, `charge_credits`, `refund_credits`, or crash recovery.
-- Keep unsupported payment flows visibly outside the package. Do not document clawbacks, dispute handlers, uncollectible debt tracking, or `settle_credits` unless BabySea production implements the same flow and the OSS surface is updated.
-- Keep service-role database credentials, Stripe secrets, Sentry auth tokens, webhook payloads, and customer identifiers out of public fixtures and logs.
-- Keep the TypeScript and Python SDK behavior in sync when changing ledger operations or payload contracts.
-- Prefer focused changes. Avoid unrelated refactors in migrations, SDK code, demos, or deployment docs.
+Use [README.md](README.md) as the source of truth for this project's purpose, supported workflows, runtime boundaries, and validation steps. If this project includes [AGENTS.md](AGENTS.md), follow it for repository-specific development guidance.
 
-## Documentation standard
-
-Ledger Fortress docs are part of the public contract for this primitive. Keep them factual, operator-ready, and tied to behavior that exists in this repository.
-
-- Start from the README contract: what the primitive is, what it is not, how to deploy it, how to validate it, and how to recover it.
-- Use exact SQL function names, table names, schema names, environment variable names, commands, and file paths.
-- Use Supabase-first terminology. Use PostgreSQL only for Supabase SQL behavior, PostgreSQL-compatible URLs, `psql`, database client libraries, connection details, or local developer stand-ins.
-- Document validation steps beside operational claims. If a guide says a path is production-ready, include the check, workflow, or smoke harness that proves it.
-- Keep security guidance concrete: where service-role keys live, which values must not be logged, how keys are rotated, and what should never be posted publicly.
-- Update `CHANGELOG.md` for user-visible docs, configuration, security, SDK behavior, schema, deployment, or operations changes.
-- Avoid roadmap language in the public contract. New features stay out of README claims until implemented, documented, and validated for this stack.
-
-When a change touches these areas, update the matching docs before opening a PR:
-
-| Change area                    | Required docs to review                                           |
-| :----------------------------- | :---------------------------------------------------------------- |
-| SQL ledger behavior            | README invariants, `docs/edge-cases.md`, PgTAP tests, SECURITY.md |
-| Stripe event handling          | README Stripe sections, `docs/stripe-event-matrix.md`, SDK docs   |
-| SDK operation shape            | TypeScript README, Python README, examples, schemas               |
-| Security or RLS behavior       | README production readiness, SECURITY.md, verification scripts    |
-| Demo or local-stack behavior   | README quick start, Docker Compose docs, demo scripts             |
-| Sentry or CI workflows         | README release gates, SECURITY.md, this guide                     |
-| Schema or event envelope shape | README events, JSON Schemas, examples, changelog                  |
+Prefer changes that make this project easier to adopt, operate, secure, test, and maintain. Avoid adding features that do not match the documented scope in [README.md](README.md).
 
 ## Development flow
 
-### SQL
+1. Install dependencies using the package manager and commands documented in [README.md](README.md) or the project manifest.
 
-```bash
-cd examples/docker-compose-local
-docker compose up -d
-psql postgresql://fortress:fortress@localhost:5432/fortress
-```
+   ```bash
+   pnpm install --frozen-lockfile
+   ```
 
-### TypeScript SDK
+2. If this project includes an environment template, copy it before running local services.
 
-The published SDK targets Node.js 22+ at runtime. Local TypeScript SDK development uses the Vitest 4/Vite 8 toolchain and requires Node.js 22.12+.
+   ```bash
+   cp .env.example .env.local
+   ```
 
-```bash
-cd client/typescript
-npm install
-npm run lint
-npm run test:coverage
-npm run build
-```
+3. Configure only the values required by [README.md](README.md) or `.env.example`. Keep all secrets local.
 
-### Python SDK
+4. Run the local validation commands documented by this project. Common examples include:
 
-```bash
-cd client/python
-pip install -e ".[dev]"
-ruff check .
-pyright
-pytest
-```
+   ```bash
+   pnpm format
+   pnpm lint
+   pnpm typecheck
+   pnpm test
+   pnpm build
+   ```
+
+If this project uses npm, Python, Docker, or another toolchain, use the equivalent commands documented in [README.md](README.md).
 
 ## Before opening a pull request
 
-Run the checks that match your change:
+Run every relevant check for the files you changed. If a command is not available in this repository, mention the equivalent validation in the pull request.
+
+Common checks include:
 
 ```bash
-(cd client/typescript && npm run lint && npm run test:coverage && npm run build)
-(cd client/python && ruff check . && pyright && pytest)
+pnpm format
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
 ```
 
-For ledger or SQL changes, also run the PgTAP invariant suite and the disposable concurrency simulation documented in the README.
+For package projects, also run the package dry-run documented in [README.md](README.md). For infrastructure or deployment changes, include the validation command that proves the configuration still loads.
+
+## Contribution guidelines
+
+- Keep the public repo friendly: no secrets, private project ids, local-only URLs, personal generated media, signed URLs, customer data, or private internal references.
+- Keep changes inside this project's documented scope. If the scope should change, update [README.md](README.md) and explain the reasoning in the pull request.
+- Keep public APIs, schemas, command-line flags, environment variables, deployment behavior, and generated outputs versioned and documented.
+- Add or update tests for user-visible behavior, data contracts, security-sensitive paths, and bug fixes.
+- Keep adapters thin and business logic testable when this project includes runtime code.
+- Validate untrusted input before it reaches storage, network calls, provider SDKs, shell commands, templates, or generated artifacts.
+- Do not log secrets, credentials, tokens, prompts, private media, customer data, or signed URLs.
+- Keep every secret described in `.env.example` server-side unless that template explicitly marks the value as public.
+- Update [README.md](README.md), [CHANGELOG.md](CHANGELOG.md), [SECURITY.md](SECURITY.md), and tests when behavior, configuration, security posture, or operations change.
+
+## Documentation standard
+
+Documentation is part of the release contract. Keep it factual, operator-ready, and tied to behavior that exists in the repository.
+
+- Start from [README.md](README.md): what this project is, what it is not, how to install or deploy it, how to validate it, and how to recover or debug common issues.
+- Use `.env.example` as the source of truth for environment variable names when the project has runtime configuration.
+- Document validation steps beside operational claims.
+- Keep security guidance concrete: where secrets live, which values are browser-visible, how to rotate keys, and what should never be posted publicly.
+- Update [CHANGELOG.md](CHANGELOG.md) for user-visible docs, configuration, security, operations, API, schema, or packaging changes.
+- Avoid roadmap language in the public contract. New features stay out of README claims until implemented, documented, and validated.
+
+When a change touches these areas, review the matching docs before opening a pull request:
+
+| Change area                                        | Required docs to review                                 |
+| :------------------------------------------------- | :------------------------------------------------------ |
+| Public API, SDK exports, schemas, or CLI flags     | README, CHANGELOG.md, tests                             |
+| Required or optional environment values            | README, `.env.example`, SECURITY.md                     |
+| Authentication, authorization, webhooks, or keys   | README, SECURITY.md, tests                              |
+| Provider, network, storage, queue, or database use | README, SECURITY.md, deployment docs, tests             |
+| Packaging, CI, release, or deployment behavior     | README, CHANGELOG.md, LICENSES.md, workflow files       |
+| Documentation-only changes                         | README, CHANGELOG.md, CODE_OF_CONDUCT.md where relevant |
 
 ## Issue triage
 
 - `bug` - reproducible defect, with logs, a failing test, or a minimal reproduction.
 - `proposal` - scoped design idea with the user problem, implementation sketch, and validation path.
 - `good first issue` - small, well-scoped change that can be validated without production credentials.
+- `security` - do not open public issues for vulnerabilities; follow [SECURITY.md](SECURITY.md).
 
 ## Conduct
 
-See [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md). Be respectful, assume good faith, and keep discussion focused on the work and the people using it.
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Be respectful, assume good faith, and keep discussion focused on the work and the people using it.
 
 ## Security-sensitive changes
 
-Open security fixes privately through the process in [`SECURITY.md`](SECURITY.md). Do not include real Stripe keys, private payment data, customer identifiers, database URLs, service-role credentials, webhook payloads, unreleased vulnerability details, or live production data in public issues, pull requests, test fixtures, logs, or screenshots.
+Open security fixes privately through the process in [SECURITY.md](SECURITY.md). Do not include secrets, deployment details, unreleased vulnerability details, private prompts, reference media, generated media, customer data, or signed URLs in public issues, pull requests, test fixtures, logs, or screenshots.
+
+## License compliance
+
+Review [LICENSES.md](LICENSES.md) before adding dependencies or redistributed content. Dependency license changes should be called out in the pull request and reflected in [CHANGELOG.md](CHANGELOG.md) when they affect users.

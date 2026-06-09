@@ -36,7 +36,7 @@ All notable changes will be documented here. The format follows [Keep a Changelo
 
 ### Changed
 
-- Added `ruff check .` to the Python package CI job in both GitHub Actions (`publish-check.yml`) and CircleCI (`config.yml`) so the Python SDK is linted consistently with `adaptive-island`.
+- Added `ruff check .` to the Python package CI job in both GitHub Actions (`package-check.yml`) and CircleCI (`config.yml`) so the Python SDK is linted consistently with `adaptive-island`.
 
 ## [0.2.2] - 2026-05-23
 

@@ -1,73 +1,68 @@
-# Security Policy
+# Security policy
 
-## Supported versions
+This project is a public BabySea OSS repository. Its security boundary, runtime model, supported deployment mode, and expected validation steps are defined in [README.md](README.md).
 
-`ledger-fortress` is a v0.x production OSS primitive with pre-1.0 release semantics. Security fixes target the latest public release and the `main` branch.
+## Reporting vulnerabilities
 
-## Reporting a vulnerability
+Please report vulnerabilities privately through GitHub's **Report a vulnerability** flow on this project's public repository. If that flow is unavailable, contact the maintainers at `dev@babysea.ai`.
 
-Please report vulnerabilities privately through GitHub's **Report a vulnerability** flow on the public `babysea-community/ledger-fortress` repository. If that flow is unavailable, contact the maintainers at `dev@babysea.ai`.
+Do not open public issues for suspected vulnerabilities or exposed secrets.
 
-Do not open a public issue for suspected vulnerabilities. We will acknowledge valid reports as quickly as possible, investigate impact, and publish a fix or mitigation before public disclosure.
+Useful reports include the affected route, package, workflow, file, command, schema, or deployment mode; reproduction steps; expected impact; and whether any secret, private data, prompt, generated media, or signed URL may have been exposed. Do not include real API keys, private prompts, reference media, generated media, customer data, signed URLs, or exploit payloads in public spaces.
 
-## Sentry code guard
+## What to report
 
-The public OSS repository is connected to a private, repository-specific Sentry project for repository ownership, Seer-assisted review, and issue routing. The Sentry organization slug and project slug are intentionally not committed to this public repo.
+Please report issues such as:
 
-This repo keeps Sentry as a repository guardrail, not runtime telemetry. It ships `scripts/sentry-project-check.mjs` and a scheduled `Sentry Project Check` workflow that verifies the configured project slug, active status, `other` platform, and Code Guard ownership rules using GitHub Actions secrets only. Use `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, and `SENTRY_PROJECT` as repository secrets. Local `.sentryclirc` files are ignored by git. No Sentry SDK, DSN, tracing, or runtime telemetry is included in this package.
-
-## Runtime posture
-
-`ledger-fortress` is a backend-only credit ledger. Do not call it directly from
-browser or mobile clients. Runtime writes must go through a trusted backend or
-service role that has already authenticated the account and authorized the
-credit operation.
-
-## Security model
-
-| Boundary | Owner | Security requirement |
-| :------- | :---- | :------------------- |
-| Payment facts | Stripe | Verify raw webhook payloads with `verifyStripeSignature()` before handling the event. |
-| Ledger state | Supabase | Apply all migrations, keep RLS enabled, and mutate balances only through fortress functions. |
-| Account authorization | Your backend | Map Stripe customers and generation IDs to account IDs before calling the SDK. |
-| Client roles | Supabase `anon` and `authenticated` | Must not read fortress tables or execute fortress RPCs. |
-| Recovery jobs | Trusted cron or worker | May call `recoverOrphans()` with backend credentials and must treat callbacks as application state updates. |
+- Authentication, authorization, tenancy, or scope bypass.
+- Exposure of provider credentials, platform tokens, database secrets, webhook secrets, callback secrets, npm tokens, GitHub or GitLab tokens, Sentry tokens, signing keys, or other deployment secrets.
+- Webhook signature bypass, replay, or delivery deduplication failures.
+- Unsafe callback signing, callback payload tampering, or untrusted redirect behavior.
+- Cross-user disclosure of prompts, reference media, generated media, request metadata, logs, account data, or private operational details.
+- Server-side request forgery, unsafe URL handling, path traversal, command injection, template injection, or unsafe file handling.
+- Provider-mode, region, endpoint, or adapter confusion that could send data to the wrong external service or leak raw provider parameters.
+- Supply-chain issues involving dependencies, generated artifacts, CI workflows, release scripts, or package contents.
 
 ## Secret handling
 
-- Keep Supabase service-role keys, Supabase database URLs, direct database passwords, and Stripe secret/webhook keys server-side only.
-- Use Stripe test-mode restricted keys for smoke validation. The real-stack smoke harness refuses live Stripe keys.
-- Do not commit `.env`, smoke-test result files, database URLs, or webhook payloads containing customer metadata.
-- Scope CI secrets to the repository/environment that actually runs the smoke test.
-- Rotate Stripe webhook secrets, Stripe API keys, Supabase database credentials, service-role keys, and Sentry code-guard tokens through secret storage. Do not rotate by committing config files.
+- Use `.env.example` as the source of truth for runtime, build, CI, provider, webhook, callback, cron, rate-limit, analytics, and monitoring variables when this project has environment configuration.
+- Keep every secret server-side unless `.env.example` explicitly marks the value as public.
+- Keep provider keys, deployment tokens, database credentials, webhook secrets, signed URLs, private prompts, private media, and customer data out of logs, screenshots, chats, issues, pull requests, fixtures, generated files, and package artifacts.
+- Treat provider region, base URL, model routing, storage, queue, and integration settings as deployment configuration unless [README.md](README.md) intentionally documents them as public behavior.
+- Rotate any key that appears in logs, screenshots, chats, issues, pull requests, deployment output, CI artifacts, or generated package contents.
 
-## Database boundary
+## Runtime boundary
 
-- Apply `migrations/003_security.sql` after schema migrations to enable RLS, revoke client grants, set `SECURITY DEFINER` on mutating functions, and lock `search_path`.
-- Run `scripts/verify-rls.sh`, `scripts/verify-functions.sh`, and `scripts/verify-anon-denied.sh` against a Supabase project before exposing the ledger through an API.
-- Never grant `anon` or `authenticated` table writes to `credits` or `credit_ledger`.
-- Do not add refund/dispute clawback behavior unless it is implemented and tested as an explicit extension; current Stripe refunds/disputes are deliberately outside this package.
+This file is intentionally project-neutral. The exact runtime boundary depends on the project type:
 
-## Operational guardrails
+| Project type | Security focus                                                                                   |
+| :----------- | :----------------------------------------------------------------------------------------------- |
+| SDK          | Package contents, exported API contract, dependency surface, local data handling, and examples.  |
+| Primitive    | Infrastructure boundary, data contracts, operational credentials, storage, queues, and services. |
+| Starter      | Application auth, route handlers, public environment values, webhooks, callbacks, and deploys.   |
+| Docs         | Public content, examples, links, generated artifacts, and secret-free publishing workflows.      |
 
-- Keep reserve, charge, refund, add-credit, alert, and recovery calls on trusted servers.
-- Treat `credit_ledger` as immutable audit history. Do not repair financial state by editing ledger rows directly.
-- Keep alert delivery and recovery notifications outside the critical reserve path.
-- Monitor duplicate Stripe deliveries as normal retries, but investigate unexpected increases in missing-account, missing-subscription, or failed-recovery outcomes.
-- Run security verification scripts after migrations, credential rotations, database restores, or privilege changes.
-- Keep Package Check green: TypeScript lint, coverage, build, verification-script syntax, package dry-run, and Python package checks.
+Follow [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and any project-specific [AGENTS.md](AGENTS.md) for the concrete boundary.
 
-## Incident response
+## Public disclosure rules
 
-For suspected ledger compromise, leaked credentials, or incorrect credit movement:
+- Do not post vulnerability details publicly until maintainers have confirmed a fix or disclosure plan.
+- Do not include exploit payloads that could be immediately reused against public deployments.
+- Do not include real secrets, private URLs, private prompts, private reference media, generated media, customer data, or logs containing personal data.
+- Use private maintainer channels when a reproduction requires sensitive material.
 
-1. Disable affected webhook endpoints or generation dispatch if active abuse is possible.
-2. Rotate the exposed Stripe, Supabase, or Sentry credential.
-3. Preserve Stripe event IDs, generation IDs, account IDs, and `credit_ledger` rows for investigation.
-4. Re-run RLS and function verification scripts against the affected Supabase project.
-5. Reconcile balances from Stripe paid events and immutable ledger history before reopening writes.
-6. Publish a fix or mitigation before public disclosure when a vulnerability affects the OSS package.
+## Operational hardening
 
-## Data handling
+- Run the validation commands documented in [README.md](README.md) before deploys, releases, and security-sensitive changes.
+- Keep public environment variables limited to values that are safe for browsers or public clients.
+- Prefer scoped credentials, least-privilege tokens, short-lived keys, and separate credentials per environment.
+- Validate untrusted input before storage, network calls, provider SDKs, shell commands, template rendering, or generated artifacts.
+- Keep CI logs, package previews, and release artifacts free of secrets and private data.
+- Review [LICENSES.md](LICENSES.md) when dependencies or redistributed content change.
 
-`ledger-fortress` stores account IDs, generation IDs, model identifiers, Stripe-derived idempotency descriptions, balances, alert thresholds, and timestamps. Avoid storing secrets, raw webhook payloads, email addresses, or customer payment details in ledger descriptions. Keep sensitive incident details in private vulnerability reports instead of public issues.
+## Related documents
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) explains how to propose safe changes.
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) explains expected community behavior.
+- [LICENSES.md](LICENSES.md) explains dependency license review.
+- [CHANGELOG.md](CHANGELOG.md) records user-visible security and behavior changes.
