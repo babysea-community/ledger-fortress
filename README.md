@@ -14,7 +14,7 @@ Atomic credit settlement engine for async inference workloads.
 
 [![BabySea Blog](https://custom-icon-badges.demolab.com/badge/read-blog-0D9488?style=for-the-badge&logo=babysea&logoColor=white)](https://babysea.ai/blog/how-babysea-built-atomic-credit-settlement-on-stripe-and-postgres)
 [![BabySea OSS Primitive](https://custom-icon-badges.demolab.com/badge/oss-primitive-EA580c?style=for-the-badge&logo=babysea&logoColor=white)](#babysea-oss-taxonomy)
-[![BabySea OSS Status Production](https://custom-icon-badges.demolab.com/badge/oss_status-production-C026D3?style=for-the-badge&logo=babysea&logoColor=white)](#status)
+[![BabySea OSS Status Production](https://custom-icon-badges.demolab.com/badge/status-production-C026D3?style=for-the-badge&logo=babysea&logoColor=white)](#status)
 [![License](https://custom-icon-badges.demolab.com/badge/license-apache_2.0-059669?style=for-the-badge&logo=apache&logoColor=white)](LICENSE)
 
 <br/>
@@ -22,9 +22,7 @@ Atomic credit settlement engine for async inference workloads.
 <strong>Checks</strong>
 
 [![GitLabCI](https://img.shields.io/gitlab/pipeline-status/babysea/ledger-fortress?branch=main&style=for-the-badge&label=gitlabci&logo=gitlab&logoColor=white&color=FC6D26)](https://gitlab.com/babysea/ledger-fortress/-/commits/main)
-[![CircleCI](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcircleci.com%2Fapi%2Fv1.1%2Fproject%2Fcircleci%2F2uTLcwc4naeNuKDP41es88%2FEGomeQrEcDBm1vy8xuMFbV%2Ftree%2Fmain%3Flimit%3D1&query=%24%5B0%5D.status&style=for-the-badge&logo=circleci&logoColor=white&label=circleci&color=003740)](https://dl.circleci.com/status-badge/redirect/circleci/2uTLcwc4naeNuKDP41es88/EGomeQrEcDBm1vy8xuMFbV/tree/main)
 [![Codecov](https://img.shields.io/codecov/c/github/babysea-community/ledger-fortress?style=for-the-badge&label=codecov&logo=codecov&logoColor=white&color=FF0077&token=NXej1IrSV4)](https://codecov.io/github/babysea-community/ledger-fortress)
-[![Sentry](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/sentry-check.yml?style=for-the-badge&label=sentry&logo=sentry&logoColor=white&color=181225)](https://github.com/babysea-community/ledger-fortress/actions/workflows/sentry-check.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/codeql.yml?style=for-the-badge&label=codeql&logo=github&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/codeql.yml)
 [![Package](https://img.shields.io/github/actions/workflow/status/babysea-community/ledger-fortress/package-check.yml?style=for-the-badge&label=package&logo=npm&logoColor=white)](https://github.com/babysea-community/ledger-fortress/actions/workflows/package-check.yml)
 
@@ -61,9 +59,9 @@ BabySea open source projects are organized into three categories:
 
 BabySea OSS projects are published into three status levels:
 
-[![BabySea OSS Status Working](https://custom-icon-badges.demolab.com/badge/oss_status-working-DB2777?style=for-the-badge&logo=babysea&logoColor=white)](#status)
-[![BabySea OSS Status Production](https://custom-icon-badges.demolab.com/badge/oss_status-production-C026D3?style=for-the-badge&logo=babysea&logoColor=white)](#status)
-[![BabySea OSS Status Alpha](https://custom-icon-badges.demolab.com/badge/oss_status-alpha-D97706?style=for-the-badge&logo=babysea&logoColor=white)](#status)
+[![BabySea OSS Status Working](https://custom-icon-badges.demolab.com/badge/status-working-DB2777?style=for-the-badge&logo=babysea&logoColor=white)](#status)
+[![BabySea OSS Status Production](https://custom-icon-badges.demolab.com/badge/status-production-C026D3?style=for-the-badge&logo=babysea&logoColor=white)](#status)
+[![BabySea OSS Status Alpha](https://custom-icon-badges.demolab.com/badge/status-alpha-D97706?style=for-the-badge&logo=babysea&logoColor=white)](#status)
 
 | Status         | Description                                                                                                                                                                          |
 | :------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -99,23 +97,13 @@ See [`CHANGELOG.md`](CHANGELOG.md) to track releases and public contract changes
     - [Stripe integration](#stripe-integration)
     - [Credit alerts and recovery](#credit-alerts-and-recovery)
     - [Fail-open by design](#fail-open-by-design)
-8. [Production readiness](#8-production-readiness)
-    - [Enterprise posture](#enterprise-posture)
-    - [Configuration surface](#configuration-surface)
-    - [Production deployment](#production-deployment)
-    - [Release gates](#release-gates)
-    - [Production checklist](#production-checklist)
-    - [Monitoring](#monitoring)
-    - [Backup and disaster recovery](#backup-and-disaster-recovery)
-    - [Secret rotation](#secret-rotation)
-    - [Troubleshooting](#troubleshooting)
-9. [Version surface](#9-version-surface)
-10. [Security and Compliance](#10-security-and-compliance)
-11. [Community](#11-community)
+8. [Version surface](#9-version-surface)
+9. [Security and Compliance](#10-security-and-compliance)
+10. [Community](#11-community)
     - [Who's using it](#whos-using-it)
     - [Related projects](#related-projects)
     - [Contributing](#contributing)
-12. [License](#12-license)
+11. [License](#12-license)
 
 ---
 
@@ -393,120 +381,7 @@ See [`docs/crash-recovery.md`](docs/crash-recovery.md) and [`docs/edge-cases.md`
 
 The reserve path is intentionally small and synchronous because credits must be gated before dispatch. Everything else is reconciled or recovered around that invariant.
 
-## 8. Production readiness
-
-Treat `ledger-fortress` as financial infrastructure. The production boundary is intentionally small: Stripe supplies paid-event facts, Supabase owns the authoritative credit state, and trusted backend code is the only runtime allowed to mutate the ledger.
-
-For a proof-oriented map from invariants to SQL mechanisms, see [`docs/INVARIANTS.md`](docs/INVARIANTS.md).
-
-### Enterprise posture
-
-| Area | Production rule | Evidence |
-| :--- | :-------------- | :------- |
-| Ledger authority | Supabase owns balances, immutable ledger rows, constraints, RLS, and hardened functions. | `migrations/001_credits.sql`, `migrations/002_credit_alerts.sql`, `migrations/003_security.sql` |
-| Payment reconciliation | Only verified Stripe subscription invoice payments and paid one-time checkout sessions grant credits. Refunds, disputes, chargebacks, and debt workflows stay application-owned. | `client/typescript/src/stripe.ts`, [`docs/stripe-event-matrix.md`](docs/stripe-event-matrix.md) |
-| Runtime access | Backend TypeScript/Python code calls SQL functions with trusted credentials. Browser and mobile clients never write fortress tables. | [`SECURITY.md`](SECURITY.md), `scripts/verify-anon-denied.sh` |
-| Idempotency | Adds, reserves, charges, and refunds are protected by SQL-level unique partial indexes and retry-safe functions. | [`docs/INVARIANTS.md`](docs/INVARIANTS.md) |
-| Recovery | Orphaned reservations are found by Supabase SQL and refunded through the same idempotent refund path. | [`docs/crash-recovery.md`](docs/crash-recovery.md) |
-| Event contract | External ledger event consumers use versioned JSON schemas and must not break v1 in place. | [`schemas/credit-event.v1.json`](schemas/credit-event.v1.json), [`schemas/credit-alert.v1.json`](schemas/credit-alert.v1.json) |
-
-### Configuration surface
-
-| Setting | Required for | Notes |
-| :------ | :----------- | :---- |
-| `DATABASE_URL` or `SUPABASE_DATABASE_URL` | SDK runtime, migrations, verification scripts | Use direct/session connections for migrations and verification. Use a pooler compatible with your runtime traffic pattern for app requests. |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook route | Must come from the specific Stripe webhook endpoint. It is not the Stripe API key. |
-| `STRIPE_SECRET_KEY` or `STRIPE_SECRET` | Real-stack smoke harness or application-owned Stripe API calls | The smoke harness accepts only `sk_test_` or `rk_test_` keys and refuses live keys. |
-| `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD` | Real-stack smoke harness URL construction | Used when `SUPABASE_DATABASE_URL` is not provided. |
-| `SUPABASE_DB_HOST`, `SUPABASE_DB_PORT`, `SUPABASE_DB_USER` | Supavisor override | Use when direct Supabase database hosts are unavailable from the runner. |
-| `LEDGER_FORTRESS_SMOKE_RESULT` | Smoke result artifact | Optional path for sanitized smoke-test output. |
-| `LEDGER_FORTRESS_SMOKE_KEEP_SCHEMA` | Smoke debugging | Optional. Defaults to dropping the disposable schema. |
-| `LEDGER_FORTRESS_CONFIRM_DISPOSABLE_DB` | Parallel reserve simulation | Required guard for the disposable database race harness. |
-| `LEDGER_FORTRESS_RACE_*` | Parallel reserve simulation tuning | Optional attempts, starting balance, amount, and row-retention knobs. |
-| `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` | Repository code guard | Used by the Sentry project check workflow. No runtime Sentry SDK, DSN, tracing, or telemetry is shipped. |
-
-### Production deployment
-
-1. Apply `001_credits.sql`, `002_credit_alerts.sql`, and `003_security.sql` to Supabase from a trusted migration runner.
-2. Run `scripts/verify-rls.sh`, `scripts/verify-functions.sh`, and `scripts/verify-anon-denied.sh` against the target project.
-3. Keep database URLs, service-role keys, Stripe secrets, and webhook payloads on trusted servers only.
-4. Verify Stripe signatures from the raw request body before constructing or handling a Stripe event.
-5. Subscribe Stripe only to `invoice.paid`, `checkout.session.completed`, and `checkout.session.async_payment_succeeded` when asynchronous payment methods are used.
-6. Run `recoverOrphans()` periodically and set `windowMinutes` longer than your maximum expected generation time.
-7. Keep credit alert checks fire-and-forget so notification failures never block generation responses.
-8. Size SDK connection pools below your Supabase connection limits and monitor pool pressure.
-
-### Release gates
-
-| Gate | Command or workflow | What it proves |
-| :--- | :------------------ | :------------- |
-| TypeScript package | `cd client/typescript && npm ci && npm run lint && npm run test:coverage && npm run build` | SDK types, unit tests, lcov coverage, and package build are clean. |
-| Package workflow | `.github/workflows/package-check.yml` | TypeScript lint/coverage/build, Codecov upload when credentials are available, verification-script syntax, npm pack dry-run, Python install, compile, and metadata parse. |
-| Python local quality | `cd client/python && pip install -e ".[dev]" && ruff check . && pyright` | Python package remains typed and lint-clean for contributors. |
-| SQL invariants | `psql "$DATABASE_URL" -f test/invariants.pgtap.sql` | Reserve, charge, refund, and idempotency behavior stay intact on a disposable database. |
-| Parallel race | `cd client/typescript && LEDGER_FORTRESS_CONFIRM_DISPOSABLE_DB=1 npm run test:db:concurrency` | Concurrent reserves cannot overdraw and orphan refunds restore balance. |
-| Real-stack smoke | `examples/real-stack-smoke/validate.py` | Stripe test-mode authentication, disposable Supabase schema migration, SQL grants/lifecycle, alerts, and RLS/grants posture work together. |
-| Sentry guard | `.github/workflows/sentry-check.yml` | Repository-specific Sentry project wiring is active without adding runtime telemetry. |
-
-### Production checklist
-
-- [ ] All three migrations are applied in order.
-- [ ] RLS is enabled on `plans`, `credits`, `credit_ledger`, `credit_alert_settings`, and `credit_alert_log`.
-- [ ] `anon` and `authenticated` roles cannot read fortress tables or execute fortress RPCs.
-- [ ] Backend code uses trusted credentials and never exposes service-role or database secrets to client code.
-- [ ] Stripe webhooks are verified with `verifyStripeSignature()` before the handler runs.
-- [ ] Stripe webhook subscriptions are limited to the handled subscription invoice payments and paid one-time checkout sessions.
-- [ ] `plans` contains Stripe Price IDs before using plan-based grants or plan-aware UI.
-- [ ] `recoverOrphans()` is scheduled and alerts on unusual `errors` or `refunded` spikes.
-- [ ] Refund and manual-grant paths call `resetAlerts()` / `reset_alerts()` when balance recovery should re-arm low-balance thresholds.
-- [ ] Application support workflows own Stripe refunds, disputes, chargebacks, and manual deductions.
-- [ ] Connection pool size, Supabase connection limits, and long-running transactions are monitored.
-- [ ] JSON schema changes add a new version instead of breaking `credit-event.v1` or `credit-alert.v1`.
-
-### Monitoring
-
-Track ledger health at the application boundary:
-
-- Reservation attempts, successes, insufficient-credit results, and amount-validation errors.
-- `charge_credits()` and `refund_credits()` false returns, separated by duplicate, missing-reserve, already-terminal, and insufficient recollection cases when your app can classify them.
-- Stripe webhook handler actions: `credits_added`, `skipped_duplicate`, `skipped_no_account`, `skipped_no_subscription`, and `skipped_unrelated`.
-- Recovery `inspected`, `refunded`, and `errors` counts by run.
-- Low-balance alert threshold fires and resets.
-- Supabase connection pool utilization, query latency, lock waits, and failed verification checks after migrations.
-
-### Backup and disaster recovery
-
-- Enable Supabase backups or point-in-time recovery before accepting real payments.
-- Take a fresh backup before applying ledger migrations or changing RLS/function privileges.
-- Preserve `credit_ledger` as immutable audit history; do not repair balances by editing ledger rows directly.
-- Reconcile restored environments from Stripe paid events and `credit_ledger` entries before reopening generation traffic.
-- Keep recovery cron idempotent and safe to rerun after incidents.
-- Use the real-stack smoke harness in a disposable schema to validate restored infrastructure before touching production tables.
-
-### Secret rotation
-
-| Secret | Rotation guidance |
-| :----- | :---------------- |
-| Stripe webhook secret | Add a new Stripe endpoint secret, deploy it, verify signed events, then remove the old secret. |
-| Stripe API key | Prefer restricted keys for application-owned Stripe API calls. Rotate test and live keys separately. |
-| Supabase database password | Rotate through Supabase, update backend and CI secrets, then run verification scripts. |
-| Supabase service-role key | Rotate only through backend secret storage; confirm no browser bundle or public logs contain it. |
-| Sentry code-guard token | Rotate repository secrets and rerun the Sentry Project Check workflow. |
-
-### Troubleshooting
-
-| Symptom | Likely cause | Action |
-| :------ | :----------- | :----- |
-| `reserve()` returns `false` | Insufficient balance, missing `credits` row, or idempotent retry from a different account. | Check balance with `getBalance()`, inspect the prior `reserve` row for the generation, and confirm the account mapping. |
-| `charge()` or `refund()` returns `false` | Missing reserve, duplicate terminal event, already charged/refunded state, or failed recollection after a prior refund. | Inspect `credit_ledger` for the generation and route failed recollection cases to application review. |
-| Stripe webhook grants no credits | Unverified event, unknown customer, unsupported billing reason, unpaid checkout, non-positive paid amount, or failed subscription guard. | Log the handler action and verify `resolveAccountId`, `hasActiveSubscription`, and event subscription settings. |
-| Duplicate Stripe delivery repeats | Expected retry from Stripe. | Confirm the result is `skipped_duplicate` and the `invoice:*` or `order:*` ledger row exists once. |
-| Verification scripts fail | `003_security.sql` not applied, function owner/search path changed, or client grants were reintroduced. | Reapply the security migration in a safe maintenance window and rerun all three verification scripts. |
-| Real-stack smoke refuses to run | A live Stripe key was provided. | Use a Stripe test-mode restricted or secret key. |
-| Supabase connection fails from CI | Direct host resolves to an unavailable IPv6 path. | Use Supavisor settings with `SUPABASE_DB_HOST`, `SUPABASE_DB_PORT=6543`, and `SUPABASE_DB_USER=postgres.<project-ref>`. |
-| Alerts do not fire | Alerts disabled, balance did not cross below threshold, or threshold already fired and has not reset. | Check `getAlertSettings()`, current balance, and `credit_alert_log`; call `resetAlerts()` / `reset_alerts()` after balance recovery to re-arm thresholds. |
-
-## 9. Version surface
+## 8. Version surface
 
 Current version surface:
 
@@ -521,36 +396,22 @@ Current version surface:
 
 New features stay out of the public contract until they are implemented, documented, and validated against this stack.
 
-## 10. Security and Compliance
+## 9. Security and Compliance
 
 Ledger Fortress publishes its trust signals through public GitLab and GitHub checks so contributors can inspect the actual CI configuration, jobs, and reports.
 
-| Signal                      | Coverage                                                                                                                                                          |
-| :-------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GitLab application security | SAST, Advanced SAST, IaC scanning, Dependency Scanning, Secret Detection, Code Quality, guarded Container Scanning, package audit, and redacted Gitleaks.         |
-| License compliance          | Dependency license inventory is reviewed against [LICENSES.md](LICENSES.md); approval policies are deferred until the GitLab group has enough eligible reviewers. |
-| Repository guards           | GitHub CodeQL, Package Check, Sentry Project Check, CircleCI, and Codecov stay public for cross-provider verification.                                            |
-
-Container scanning is present in CI but only runs when `CS_IMAGE` is configured for a repository that publishes a container image.
-
-## 11. Community
+## 10. Community
 
 ### Who's using it
 
-- **[BabySea](https://babysea.ai)**: the execution control plane for generative media. BabySea uses the reserve -> charge -> refund core pattern this project packages.
+- **[BabySea](https://babysea.ai)**: execution control plane for generative media.
 
 *Using `ledger-fortress`? Open a PR to add yourself.*
-
-### Related projects
-
-- [BabySea SDK](https://github.com/babysea-community/babysea): Execution control plane SDK for generative media.
-- [Adaptive Island](https://github.com/babysea-community/adaptive-island): Cache-first provider selection engine for multi-provider inference workloads.
-- [Rosetta Bridge](https://github.com/babysea-community/rosetta-bridge): Request normalization engine for multi-provider inference workloads.
 
 ### Contributing
 
 We welcome PRs, issues, and design discussion. See [`CONTRIBUTING.md`](CONTRIBUTING.md), [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md), and [`SECURITY.md`](SECURITY.md).
 
-## 12. License
+## 11. License
 
 [Apache License 2.0](LICENSE). Use it, fork it, ship it.
